@@ -1,0 +1,29 @@
+{% extends 'library/base.html' %}
+
+{% block title %}Delete Member - LMS{% endblock %}
+{% block page_title %}Delete Member{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="lms-card">
+            <div class="lms-card-header">
+                <h5 style="color:#ef4444;"><i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete</h5>
+            </div>
+            <div class="lms-card-body">
+                <p style="font-size:14px; color:var(--text-muted);">
+                    Are you sure you want to delete member <strong style="color:var(--text-primary);">{{ member.name
+                        }}</strong> ({{ member.member_id }})?
+                </p>
+                <p style="font-size:12px; color:#ef4444; margin-top:8px;"><i class="fas fa-warning me-1"></i>This action
+                    cannot be undone.</p>
+                <form method="post" class="d-flex gap-3 mt-4">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-danger-lms"><i class="fas fa-trash"></i> Yes, Delete</button>
+                    <a href="{% url 'member_list' %}" class="btn-outline-lms"><i class="fas fa-times"></i> Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

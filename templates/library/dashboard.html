@@ -1,0 +1,189 @@
+{% extends 'library/base.html' %}
+
+{% block title %}Dashboard - Library Management System{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}Overview of your library system{% endblock %}
+
+{% block content %}
+<!-- Stat Cards Row -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-icon indigo"><i class="fas fa-book"></i></div>
+            <div>
+                <div class="stat-value">{{ total_books }}</div>
+                <div class="stat-label">Total Books</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-icon green"><i class="fas fa-users"></i></div>
+            <div>
+                <div class="stat-value">{{ total_members }}</div>
+                <div class="stat-label">Active Members</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-icon blue"><i class="fas fa-exchange-alt"></i></div>
+            <div>
+                <div class="stat-value">{{ total_issued }}</div>
+                <div class="stat-label">Books Issued</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-icon red"><i class="fas fa-exclamation-triangle"></i></div>
+            <div>
+                <div class="stat-value">{{ overdue_count }}</div>
+                <div class="stat-label">Overdue Books</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Second row -->
+<div class="row g-3 mb-4">
+    <div class="col-xl-8">
+        <!-- Recent Transactions -->
+        <div class="lms-card">
+            <div class="lms-card-header">
+                <h5><i class="fas fa-exchange-alt me-2" style="color:var(--primary)"></i>Recent Transactions</h5>
+                <a href="{% url 'transaction_list' %}" class="btn-outline-lms">View All</a>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="lms-table">
+                    <thead>
+                        <tr>
+                            <th>Book</th>
+                            <th>Member</th>
+                            <th>Issued</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for txn in recent_transactions %}
+                        <tr class="{% if txn.status == 'overdue' %}row-overdue{% endif %}">
+                            <td>
+                                <div style="font-weight:600; font-size:13px;">{{ txn.book.title|truncatechars:30 }}
+                                </div>
+                                <div style="font-size:11px; color:var(--text-muted);">{{ txn.book.author }}</div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="member-avatar" style="width:28px;height:28px;font-size:11px;">
+                                        {{ txn.member.name|first }}
+                                    </div>
+                                    <span style="font-size:12px;">{{ txn.member.name|truncatechars:20 }}</span>
+                                </div>
+                            </td>
+                            <td style="font-size:12px; color:var(--text-muted);">{{ txn.issue_date|date:"d M Y" }}</td>
+                            <td style="font-size:12px;">{{ txn.due_date|date:"d M Y" }}</td>
+                            <td>
+                                {% if txn.status == 'issued' %}
+                                <span class="badge-status badge-issued">Issued</span>
+                                {% elif txn.status == 'overdue' %}
+                                <span class="badge-status badge-overdue">Overdue</span>
+                                {% else %}
+                                <span class="badge-status badge-returned">Returned</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5">
+                                <div class="empty-state">
+                                    <div class="empty-icon">📋</div>
+                                    <p>No transactions yet</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4">
+        <!-- Top Books -->
+        <div class="lms-card mb-3">
+            <div class="lms-card-header">
+                <h5><i class="fas fa-fire me-2" style="color:#f59e0b;"></i>Top Borrowed</h5>
+            </div>
+            <div class="lms-card-body" style="padding: 12px 16px;">
+                {% for book in top_books %}
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="book-cover-placeholder" style="width:36px;height:46px;font-size:14px;">📖</div>
+                    <div style="flex:1; min-width:0;">
+                        <div
+                            style="font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                            {{ book.title }}
+                        </div>
+                        <div style="font-size:11px; color:var(--text-muted);">{{ book.borrow_count }} borrows</div>
+                    </div>
+                    <span class="badge-status badge-{% if book.is_available %}available{% else %}issued{% endif %}">
+                        {{ book.available }} left
+                    </span>
+                </div>
+                {% empty %}
+                <p style="font-size:12px; color:var(--text-muted); text-align:center; padding:16px 0;">No books yet</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Recent Books -->
+        <div class="lms-card">
+            <div class="lms-card-header">
+                <h5><i class="fas fa-plus me-2" style="color:var(--secondary);"></i>Recently Added</h5>
+                {% if user.is_staff %}<a href="{% url 'book_add' %}" class="btn-outline-lms" style="font-size:11px;">+
+                    Add</a>{% endif %}
+            </div>
+            <div class="lms-card-body" style="padding: 12px 16px;">
+                {% for book in recent_books %}
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="book-cover-placeholder" style="width:32px;height:42px;font-size:12px;">📚</div>
+                    <div style="flex:1; min-width:0;">
+                        <div
+                            style="font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                            {{ book.title }}
+                        </div>
+                        <div style="font-size:11px; color:var(--text-muted);">{{ book.author }}</div>
+                    </div>
+                </div>
+                {% empty %}
+                <p style="font-size:12px; color:var(--text-muted); text-align:center; padding:16px 0;">No books yet</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick actions (admin only) -->
+{% if user.is_staff %}
+<div class="lms-card">
+    <div class="lms-card-header">
+        <h5>⚡ Quick Actions</h5>
+    </div>
+    <div class="lms-card-body">
+        <div class="d-flex flex-wrap gap-3">
+            <a href="{% url 'book_add' %}" class="btn-primary-lms"><i class="fas fa-plus"></i> Add Book</a>
+            <a href="{% url 'member_add' %}" class="btn-success-lms"><i class="fas fa-user-plus"></i> Add Member</a>
+            <a href="{% url 'issue_book' %}" class="btn-outline-lms"><i class="fas fa-hand-holding-heart"></i> Issue
+                Book</a>
+            <a href="{% url 'overdue_report' %}" class="btn-outline-lms"
+                style="border-color:rgba(239,68,68,0.3); color:#ef4444;">
+                <i class="fas fa-exclamation-triangle"></i> Overdue Report
+            </a>
+            <a href="{% url 'export_transactions' %}" class="btn-outline-lms">
+                <i class="fas fa-download"></i> Export CSV
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

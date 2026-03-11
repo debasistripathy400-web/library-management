@@ -1,0 +1,145 @@
+{% extends 'library/base.html' %}
+
+{% block title %}Books - Library Management System{% endblock %}
+{% block page_title %}Book Catalog{% endblock %}
+{% block page_subtitle %}Manage and browse all books{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>📚 Books <span style="font-size:15px; font-weight:400; color:var(--text-muted);">({{ total }} total)</span>
+        </h2>
+        <p>Search, filter, and manage the book collection.</p>
+    </div>
+    {% if user.is_staff %}
+    <a href="{% url 'book_add' %}" class="btn-primary-lms"><i class="fas fa-plus"></i> Add Book</a>
+    {% endif %}
+</div>
+
+<!-- Search / Filter -->
+<div class="lms-card mb-4">
+    <div class="lms-card-body" style="padding:16px 20px;">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label">Search</label>
+                <div class="search-bar-wrapper">
+                    <span class="search-icon"><i class="fas fa-search"></i></span>
+                    <input type="text" name="query" value="{{ query }}" class="form-control"
+                        placeholder="Title, author, or ISBN..." id="bookSearchInput">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Category</label>
+                <select name="category" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if selected_category==cat.id|stringformat:"i" %}selected{% endif %}>
+                        {{ cat.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Availability</label>
+                <select name="availability" class="form-select">
+                    <option value="">All</option>
+                    <option value="available" {% if availability=='available' %}selected{% endif %}>Available</option>
+                    <option value="issued" {% if availability=='issued' %}selected{% endif %}>Fully Issued</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn-primary-lms flex-fill justify-content-center">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+                <a href="{% url 'book_list' %}" class="btn-outline-lms justify-content-center"
+                    style="padding:9px 12px;">
+                    <i class="fas fa-times"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Books Table -->
+<div class="lms-card">
+    <div style="overflow-x:auto;">
+        <table class="lms-table" id="booksTable">
+            <thead>
+                <tr>
+                    <th>Book</th>
+                    <th>Category</th>
+                    <th>Quantity</th>
+                    <th>Available</th>
+                    <th>Status</th>
+                    {% if user.is_staff %}<th>Actions</th>{% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for book in books %}
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            {% if book.cover_image %}
+                            <img src="{{ book.cover_image.url }}" class="book-cover-img" alt="{{ book.title }}">
+                            {% else %}
+                            <div class="book-cover-placeholder">📖</div>
+                            {% endif %}
+                            <div>
+                                <div style="font-weight:600; font-size:13px;">
+                                    <a href="{% url 'book_detail' book.pk %}"
+                                        style="color:var(--text-primary); text-decoration:none;">
+                                        {{ book.title }}
+                                    </a>
+                                </div>
+                                <div style="font-size:11px; color:var(--text-muted);">{{ book.author }}</div>
+                                {% if book.isbn %}<div style="font-size:10px; color:var(--text-muted);">ISBN: {{
+                                    book.isbn }}</div>{% endif %}
+                            </div>
+                        </div>
+                    </td>
+                    <td style="font-size:12px;">
+                        {% if book.category %}
+                        <span class="badge-status"
+                            style="background:rgba(99,102,241,0.12);color:var(--primary);border:1px solid rgba(99,102,241,0.25);">
+                            {{ book.category.name }}
+                        </span>
+                        {% else %}&mdash;{% endif %}
+                    </td>
+                    <td style="font-size:13px; font-weight:600; text-align:center;">{{ book.quantity }}</td>
+                    <td style="font-size:13px; font-weight:600; text-align:center;">{{ book.available }}</td>
+                    <td>
+                        {% if book.is_available %}
+                        <span class="badge-status badge-available">Available</span>
+                        {% else %}
+                        <span class="badge-status badge-issued">Fully Issued</span>
+                        {% endif %}
+                    </td>
+                    {% if user.is_staff %}
+                    <td>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'book_detail' book.pk %}" class="btn-action btn-view"><i
+                                    class="fas fa-eye"></i></a>
+                            <a href="{% url 'book_edit' book.pk %}" class="btn-action btn-edit"><i
+                                    class="fas fa-edit"></i></a>
+                            <a href="{% url 'book_delete' book.pk %}" class="btn-action btn-delete"><i
+                                    class="fas fa-trash"></i></a>
+                        </div>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6">
+                        <div class="empty-state">
+                            <div class="empty-icon">📚</div>
+                            <p>No books found. {% if user.is_staff %}<a href="{% url 'book_add' %}"
+                                    style="color:var(--primary);">Add your first book!</a>{% endif %}</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

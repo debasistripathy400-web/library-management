@@ -1,0 +1,90 @@
+{% extends 'library/base.html' %}
+
+{% block title %}Search Books - LMS{% endblock %}
+{% block page_title %}Search Books{% endblock %}
+{% block page_subtitle %}Find available books to borrow{% endblock %}
+
+{% block content %}
+<div class="lms-card mb-4">
+    <div class="lms-card-body" style="padding:16px 20px;">
+        <form method="get" class="row g-2">
+            <div class="col-md-6">
+                <div class="search-bar-wrapper">
+                    <span class="search-icon"><i class="fas fa-search"></i></span>
+                    <input type="text" name="query" value="{{ query }}" class="form-control"
+                        placeholder="Search by title or author...">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="category" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if request.GET.category == cat.id|stringformat:"i" %}selected{% endif
+                        %}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn-primary-lms flex-fill justify-content-center"><i
+                        class="fas fa-search"></i> Search</button>
+                <a href="{% url 'member_search' %}" class="btn-outline-lms"><i class="fas fa-times"></i></a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="lms-card">
+    <div class="lms-card-header">
+        <h5>Available Books ({{ books.count }})</h5>
+    </div>
+    <div style="overflow-x:auto;">
+        <table class="lms-table">
+            <thead>
+                <tr>
+                    <th>Book</th>
+                    <th>Author</th>
+                    <th>Category</th>
+                    <th>Available</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for book in books %}
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="book-cover-placeholder" style="width:36px;height:46px;font-size:14px;">📖</div>
+                            <div>
+                                <div style="font-weight:600; font-size:13px;">{{ book.title }}</div>
+                                {% if book.isbn %}<div style="font-size:10px; color:var(--text-muted);">ISBN: {{
+                                    book.isbn }}</div>{% endif %}
+                            </div>
+                        </div>
+                    </td>
+                    <td style="font-size:13px;">{{ book.author }}</td>
+                    <td>
+                        {% if book.category %}
+                        <span class="badge-status"
+                            style="background:rgba(99,102,241,0.1);color:var(--primary);border:1px solid rgba(99,102,241,0.2);">
+                            {{ book.category.name }}
+                        </span>
+                        {% else %}—{% endif %}
+                    </td>
+                    <td>
+                        <span class="badge-status badge-available">{{ book.available }} copies</span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">
+                        <div class="empty-state">
+                            <div class="empty-icon">🔍</div>
+                            <p>No books found. Try a different search.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

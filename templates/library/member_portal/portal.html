@@ -1,0 +1,183 @@
+{% extends 'library/base.html' %}
+
+{% block title %}My Dashboard - LMS{% endblock %}
+{% block page_title %}My Library{% endblock %}
+{% block page_subtitle %}Your books and account information{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-icon blue"><i class="fas fa-book-open"></i></div>
+            <div>
+                <div class="stat-value">{{ active_transactions.count }}</div>
+                <div class="stat-label">Books Borrowed</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-icon indigo"><i class="fas fa-history"></i></div>
+            <div>
+                <div class="stat-value">{{ member.total_borrows }}</div>
+                <div class="stat-label">Total Borrows</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-icon green"><i class="fas fa-id-card"></i></div>
+            <div>
+                <div class="stat-value" style="font-size:18px;">{{ member.member_id }}</div>
+                <div class="stat-label">Member ID</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-icon amber"><i class="fas fa-calendar"></i></div>
+            <div>
+                <div class="stat-value" style="font-size:18px;">{{ member.join_date|date:"M Y" }}</div>
+                <div class="stat-label">Member Since</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-xl-8">
+        <div class="lms-card mb-3">
+            <div class="lms-card-header">
+                <h5><i class="fas fa-book-open me-2" style="color:var(--primary);"></i>Currently Borrowed</h5>
+                <a href="{% url 'member_search' %}" class="btn-primary-lms" style="font-size:12px; padding:6px 14px;">
+                    <i class="fas fa-search"></i> Find Books
+                </a>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="lms-table">
+                    <thead>
+                        <tr>
+                            <th>Book</th>
+                            <th>Issued</th>
+                            <th>Due Date</th>
+                            <th>Days Left</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for txn in active_transactions %}
+                        <tr class="{% if txn.status == 'overdue' %}row-overdue{% endif %}">
+                            <td>
+                                <div style="font-weight:600; font-size:13px;">{{ txn.book.title|truncatechars:35 }}
+                                </div>
+                                <div style="font-size:11px; color:var(--text-muted);">{{ txn.book.author }}</div>
+                            </td>
+                            <td style="font-size:12px;">{{ txn.issue_date|date:"d M Y" }}</td>
+                            <td
+                                style="font-size:12px; {% if txn.status == 'overdue' %}color:#ef4444; font-weight:600;{% endif %}">
+                                {{ txn.due_date|date:"d M Y" }}
+                            </td>
+                            <td>
+                                {% if txn.days_remaining is not None %}
+                                {% if txn.days_remaining < 0 %} <span
+                                    style="color:#ef4444; font-weight:700; font-size:13px;">{{ txn.days_remaining }}
+                                    days</span>
+                                    {% elif txn.days_remaining <= 3 %} <span
+                                        style="color:#f59e0b; font-weight:600; font-size:13px;">{{ txn.days_remaining }}
+                                        days</span>
+                                        {% else %}
+                                        <span style="color:var(--text-muted); font-size:12px;">{{ txn.days_remaining }}
+                                            days</span>
+                                        {% endif %}
+                                        {% endif %}
+                            </td>
+                            <td><span class="badge-status badge-{{ txn.status }}">{{ txn.get_status_display }}</span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5">
+                                <div class="empty-state">
+                                    <div class="empty-icon">📚</div>
+                                    <p>No books borrowed. <a href="{% url 'member_search' %}"
+                                            style="color:var(--primary);">Browse available books!</a></p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="lms-card">
+            <div class="lms-card-header">
+                <h5><i class="fas fa-history me-2" style="color:var(--text-muted);"></i>Borrowing History</h5>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="lms-table">
+                    <thead>
+                        <tr>
+                            <th>Book</th>
+                            <th>Returned</th>
+                            <th>Fine Paid</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for txn in history %}
+                        <tr>
+                            <td>
+                                <div style="font-size:13px; font-weight:600;">{{ txn.book.title|truncatechars:40 }}
+                                </div>
+                                <div style="font-size:11px; color:var(--text-muted);">{{ txn.book.author }}</div>
+                            </td>
+                            <td style="font-size:12px;">{{ txn.return_date|date:"d M Y"|default:"—" }}</td>
+                            <td style="font-size:12px;">
+                                {% if txn.fine_amount > 0 %}<span style="color:#ef4444;">₹{{ txn.fine_amount }}</span>
+                                {% else %}<span style="color:var(--text-muted);">None</span>{% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3">
+                                <div class="empty-state" style="padding:24px;">
+                                    <p>No borrowing history.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4">
+        <div class="lms-card">
+            <div class="lms-card-header">
+                <h5>My Profile</h5>
+            </div>
+            <div class="lms-card-body">
+                <div style="text-align:center; margin-bottom:20px;">
+                    <div
+                        style="width:80px; height:80px; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:700; color:white; margin:0 auto 12px;">
+                        {{ member.name|first }}
+                    </div>
+                    <div style="font-weight:700;">{{ member.name }}</div>
+                    <code style="color:var(--primary); font-size:12px;">{{ member.member_id }}</code>
+                </div>
+                <div style="font-size:13px;">
+                    <div class="info-row"><span class="info-label"><i class="fas fa-envelope"></i></span> {{
+                        member.email }}</div>
+                    <div class="info-row"><span class="info-label"><i class="fas fa-phone"></i></span> {{ member.phone
+                        }}</div>
+                    {% if member.address %}
+                    <div class="info-row"><span class="info-label"><i class="fas fa-map"></i></span> <span
+                            style="color:var(--text-muted);">{{ member.address }}</span></div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

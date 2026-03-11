@@ -1,0 +1,93 @@
+{% extends 'library/base.html' %}
+{% load static %}
+
+{% block title %}Welcome - Library Management System{% endblock %}
+
+{% block content %}
+{% endblock %}
+
+{% block auth_content %}
+<div class="landing-hero"
+    style="min-height: 100vh; background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent), radial-gradient(circle at bottom left, rgba(168, 85, 247, 0.1), transparent); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px 20px;">
+
+    <div class="container">
+        <div class="mb-4">
+            <span class="badge rounded-pill mb-3"
+                style="background: rgba(99, 102, 241, 0.2); color: var(--primary); padding: 8px 16px; border: 1px solid rgba(99, 102, 241, 0.3);">
+                ✨ Modern Library Management
+            </span>
+            <h1 class="display-3 fw-bold mb-3"
+                style="background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
+                Your Knowledge, <br> Beautifully Organized.
+            </h1>
+            <p class="lead mb-5 mx-auto" style="max-width: 600px; color: var(--text-muted);">
+                Welcome to the digital gateway of our collection. Manage books, track loans, and discover your next
+                great read with our intuitive dashboard.
+            </p>
+
+            <div class="d-flex flex-wrap justify-content-center gap-3 mb-5">
+                <a href="{% url 'login' %}" class="btn-primary-lms py-3 px-5 fs-5">
+                    <i class="fas fa-sign-in-alt me-2"></i> Get Started
+                </a>
+                <a href="{% url 'register' %}" class="btn-outline-lms py-3 px-5 fs-5">
+                    <i class="fas fa-user-plus me-2"></i> Create Account
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-5">
+            <div class="col-md-4">
+                <div class="lms-card h-100 p-4" style="border: 1px solid rgba(255,255,255,0.05);">
+                    <div class="stat-icon indigo mb-3 mx-auto"><i class="fas fa-search"></i></div>
+                    <h5>Fast Discovery</h5>
+                    <p class="small text-muted">Search through thousands of books by title, author, or ISBN in seconds.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="lms-card h-100 p-4" style="border: 1px solid rgba(255,255,255,0.05);">
+                    <div class="stat-icon green mb-3 mx-auto"><i class="fas fa-mobile-alt"></i></div>
+                    <h5>Digital First</h5>
+                    <p class="small text-muted">Access your member portal from any device to check due dates and fines.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="lms-card h-100 p-4" style="border: 1px solid rgba(255,255,255,0.05);">
+                    <div class="stat-icon blue mb-3 mx-auto"><i class="fas fa-shield-alt"></i></div>
+                    <h5>Secure Management</h5>
+                    <p class="small text-muted">Advanced administration tools for tracking every transaction accurately.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 16px;
+        font-size: 24px;
+    }
+
+    .stat-icon.indigo {
+        background: rgba(99, 102, 241, 0.1);
+        color: #818cf8;
+    }
+
+    .stat-icon.green {
+        background: rgba(34, 197, 94, 0.1);
+        color: #4ade80;
+    }
+
+    .stat-icon.blue {
+        background: rgba(59, 130, 246, 0.1);
+        color: #60a5fa;
+    }
+</style>
+{% endblock %}

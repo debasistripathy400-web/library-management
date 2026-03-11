@@ -1,0 +1,175 @@
+{% extends 'library/base.html' %}
+
+{% block title %}{{ member.name }} - LMS{% endblock %}
+{% block page_title %}Member Detail{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'member_list' %}">Members</a></li>
+        <li class="breadcrumb-item active">{{ member.name }}</li>
+    </ol>
+</nav>
+
+<div class="row g-4">
+    <div class="col-xl-4">
+        <div class="lms-card">
+            <div class="lms-card-body" style="text-align:center; padding-top:32px;">
+                {% if member.photo %}
+                <img src="{{ member.photo.url }}" alt="{{ member.name }}"
+                    style="width:100px; height:100px; object-fit:cover; border-radius:50%; border:3px solid var(--primary); margin-bottom:16px;">
+                {% else %}
+                <div
+                    style="width:100px; height:100px; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:36px; font-weight:700; color:white; margin:0 auto 16px;">
+                    {{ member.name|first }}
+                </div>
+                {% endif %}
+
+                <h5 style="font-weight:700;">{{ member.name }}</h5>
+                <code style="color:var(--primary); font-size:13px;">{{ member.member_id }}</code>
+                <div class="mt-3">
+                    {% if member.is_active %}
+                    <span class="badge-status badge-active">Active Member</span>
+                    {% else %}
+                    <span class="badge-status badge-inactive">Inactive</span>
+                    {% endif %}
+                </div>
+
+                <div class="divider my-4"></div>
+                <div style="text-align:left; font-size:13px;">
+                    <div class="info-row"><span class="info-label"><i class="fas fa-envelope me-1"></i>Email</span>
+                        <span style="word-break:break-all;">{{ member.email }}</span></div>
+                    <div class="info-row"><span class="info-label"><i class="fas fa-phone me-1"></i>Phone</span> {{
+                        member.phone }}</div>
+                    <div class="info-row"><span class="info-label"><i class="fas fa-calendar me-1"></i>Joined</span> {{
+                        member.join_date|date:"d M Y" }}</div>
+                    {% if member.address %}
+                    <div class="info-row"><span class="info-label"><i class="fas fa-map-pin me-1"></i>Address</span>
+                        <span style="color:var(--text-muted);">{{ member.address }}</span></div>
+                    {% endif %}
+                </div>
+
+                <div class="divider my-3"></div>
+                <div class="d-flex gap-2 justify-content-center">
+                    <a href="{% url 'member_edit' member.pk %}" class="btn-action btn-edit"><i class="fas fa-edit"></i>
+                        Edit</a>
+                    {% if user.is_staff %}
+                    <a href="{% url 'issue_book' %}?member={{ member.pk }}" class="btn-action btn-return"><i
+                            class="fas fa-book"></i> Issue</a>
+                    <a href="{% url 'member_delete' member.pk %}" class="btn-action btn-delete"><i
+                            class="fas fa-trash"></i></a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary cards -->
+        <div class="row g-3 mt-1">
+            <div class="col-6">
+                <div class="stat-card" style="flex-direction:column; align-items:flex-start;">
+                    <div class="stat-value" style="font-size:24px;">{{ member.active_borrows }}</div>
+                    <div class="stat-label">Active Borrows</div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="stat-card" style="flex-direction:column; align-items:flex-start;">
+                    <div class="stat-value" style="font-size:24px;">{{ member.total_borrows }}</div>
+                    <div class="stat-label">Total Borrows</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-8">
+        <!-- Active Borrows -->
+        <div class="lms-card mb-3">
+            <div class="lms-card-header">
+                <h5><i class="fas fa-book-open me-2" style="color:var(--primary);"></i>Currently Borrowed</h5>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="lms-table">
+                    <thead>
+                        <tr>
+                            <th>Book</th>
+                            <th>Issued</th>
+                            <th>Due</th>
+                            <th>Status</th>{% if user.is_staff %}<th>Action</th>{% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for txn in active_transactions %}
+                        <tr class="{% if txn.status == 'overdue' %}row-overdue{% endif %}">
+                            <td>
+                                <div style="font-weight:600; font-size:13px;">{{ txn.book.title|truncatechars:35 }}
+                                </div>
+                                <div style="font-size:11px;color:var(--text-muted);">{{ txn.book.author }}</div>
+                            </td>
+                            <td style="font-size:12px;">{{ txn.issue_date|date:"d M Y" }}</td>
+                            <td style="font-size:12px;">{{ txn.due_date|date:"d M Y" }}</td>
+                            <td><span class="badge-status badge-{{ txn.status }}">{{ txn.get_status_display }}</span>
+                            </td>
+                            {% if user.is_staff %}
+                            <td><a href="{% url 'return_book' txn.pk %}" class="btn-action btn-return"><i
+                                        class="fas fa-undo"></i> Return</a></td>
+                            {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5">
+                                <div class="empty-state" style="padding:24px;">
+                                    <p>No active borrows</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- History -->
+        <div class="lms-card">
+            <div class="lms-card-header">
+                <h5><i class="fas fa-history me-2" style="color:var(--text-muted);"></i>Borrowing History</h5>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="lms-table">
+                    <thead>
+                        <tr>
+                            <th>Book</th>
+                            <th>Issued</th>
+                            <th>Returned</th>
+                            <th>Fine</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for txn in history %}
+                        <tr>
+                            <td>
+                                <div style="font-size:13px;">{{ txn.book.title|truncatechars:35 }}</div>
+                                <div style="font-size:11px;color:var(--text-muted);">{{ txn.book.author }}</div>
+                            </td>
+                            <td style="font-size:12px;">{{ txn.issue_date|date:"d M Y" }}</td>
+                            <td style="font-size:12px;">{{ txn.return_date|date:"d M Y"|default:"—" }}</td>
+                            <td style="font-size:12px;">
+                                {% if txn.fine_amount > 0 %}
+                                <span style="color:#ef4444; font-weight:600;">₹{{ txn.fine_amount }}</span>
+                                {% else %}—{% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4">
+                                <div class="empty-state" style="padding:24px;">
+                                    <p>No borrowing history</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

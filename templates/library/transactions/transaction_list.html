@@ -1,0 +1,109 @@
+{% extends 'library/base.html' %}
+
+{% block title %}Transactions - LMS{% endblock %}
+{% block page_title %}Transactions{% endblock %}
+{% block page_subtitle %}Track all book issues and returns{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>🔄 Transactions</h2>
+        <p>View and manage all book issue/return transactions.</p>
+    </div>
+    <a href="{% url 'issue_book' %}" class="btn-primary-lms"><i class="fas fa-plus"></i> Issue Book</a>
+</div>
+
+<!-- Status tabs -->
+<div class="d-flex gap-2 mb-4 flex-wrap">
+    <a href="{% url 'transaction_list' %}" class="btn-outline-lms {% if not status_filter %}active{% endif %}"
+        style="{% if not status_filter %}border-color:var(--primary); color:var(--primary);{% endif %}">
+        All
+    </a>
+    <a href="?status=issued" class="btn-outline-lms {% if status_filter == 'issued' %}active{% endif %}"
+        style="{% if status_filter == 'issued' %}border-color:#3b82f6; color:#3b82f6;{% endif %}">
+        <i class="fas fa-book-open"></i> Issued ({{ issued_count }})
+    </a>
+    <a href="?status=overdue" class="btn-outline-lms {% if status_filter == 'overdue' %}active{% endif %}"
+        style="{% if status_filter == 'overdue' %}border-color:#ef4444; color:#ef4444;{% endif %}">
+        <i class="fas fa-exclamation-triangle"></i> Overdue ({{ overdue_count }})
+    </a>
+    <a href="?status=returned" class="btn-outline-lms {% if status_filter == 'returned' %}active{% endif %}"
+        style="{% if status_filter == 'returned' %}border-color:#94a3b8; color:#94a3b8;{% endif %}">
+        <i class="fas fa-check"></i> Returned ({{ returned_count }})
+    </a>
+</div>
+
+<div class="lms-card">
+    <div style="overflow-x:auto;">
+        <table class="lms-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Book</th>
+                    <th>Member</th>
+                    <th>Issued</th>
+                    <th>Due Date</th>
+                    <th>Returned</th>
+                    <th>Fine</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for txn in transactions %}
+                <tr class="{% if txn.status == 'overdue' %}row-overdue{% endif %}">
+                    <td style="font-size:12px; color:var(--text-muted);">TXN-{{ txn.id }}</td>
+                    <td>
+                        <a href="{% url 'book_detail' txn.book.pk %}"
+                            style="text-decoration:none; color:var(--text-primary);">
+                            <div style="font-weight:600; font-size:13px;">{{ txn.book.title|truncatechars:30 }}</div>
+                            <div style="font-size:11px; color:var(--text-muted);">{{ txn.book.author }}</div>
+                        </a>
+                    </td>
+                    <td>
+                        <a href="{% url 'member_detail' txn.member.pk %}"
+                            style="text-decoration:none; color:var(--text-primary);">
+                            <div style="font-size:13px;">{{ txn.member.name }}</div>
+                            <div style="font-size:11px; color:var(--primary);">{{ txn.member.member_id }}</div>
+                        </a>
+                    </td>
+                    <td style="font-size:12px;">{{ txn.issue_date|date:"d M Y" }}</td>
+                    <td
+                        style="font-size:12px; {% if txn.status == 'overdue' %}color:#ef4444; font-weight:600;{% endif %}">
+                        {{ txn.due_date|date:"d M Y" }}
+                        {% if txn.status == 'overdue' %}
+                        <div style="font-size:10px; color:#ef4444;">⚠ Overdue</div>
+                        {% endif %}
+                    </td>
+                    <td style="font-size:12px; color:var(--text-muted);">{{ txn.return_date|date:"d M Y"|default:"—" }}
+                    </td>
+                    <td style="font-size:12px;">
+                        {% if txn.fine_amount > 0 %}
+                        <span style="color:#ef4444; font-weight:600;">₹{{ txn.fine_amount }}</span>
+                        {% else %}—{% endif %}
+                    </td>
+                    <td><span class="badge-status badge-{{ txn.status }}">{{ txn.get_status_display }}</span></td>
+                    <td>
+                        {% if txn.status != 'returned' %}
+                        <a href="{% url 'return_book' txn.pk %}" class="btn-action btn-return"><i
+                                class="fas fa-undo"></i> Return</a>
+                        {% else %}
+                        <span style="font-size:11px; color:var(--text-muted);">Completed</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9">
+                        <div class="empty-state">
+                            <div class="empty-icon">🔄</div>
+                            <p>No transactions found.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

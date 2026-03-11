@@ -1,0 +1,103 @@
+{% extends 'library/base.html' %}
+
+{% block title %}Members - LMS{% endblock %}
+{% block page_title %}Members{% endblock %}
+{% block page_subtitle %}Manage library members{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>👥 Members <span style="font-size:15px; font-weight:400; color:var(--text-muted);">({{ members.count }}
+                total)</span></h2>
+        <p>View and manage all registered library members.</p>
+    </div>
+    <a href="{% url 'member_add' %}" class="btn-success-lms"><i class="fas fa-user-plus"></i> Add Member</a>
+</div>
+
+<!-- Search -->
+<div class="lms-card mb-4">
+    <div class="lms-card-body" style="padding:16px 20px;">
+        <form method="get" class="d-flex gap-2">
+            <div class="search-bar-wrapper flex-fill">
+                <span class="search-icon"><i class="fas fa-search"></i></span>
+                <input type="text" name="query" value="{{ query }}" class="form-control"
+                    placeholder="Search by name, email, ID, or phone...">
+            </div>
+            <button type="submit" class="btn-primary-lms"><i class="fas fa-filter"></i></button>
+            <a href="{% url 'member_list' %}" class="btn-outline-lms"><i class="fas fa-times"></i></a>
+        </form>
+    </div>
+</div>
+
+<div class="lms-card">
+    <div style="overflow-x:auto;">
+        <table class="lms-table">
+            <thead>
+                <tr>
+                    <th>Member</th>
+                    <th>ID</th>
+                    <th>Contact</th>
+                    <th>Joined</th>
+                    <th>Borrowing</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for member in members %}
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            {% if member.photo %}
+                            <img src="{{ member.photo.url }}" class="member-avatar" alt="{{ member.name }}"
+                                style="object-fit:cover;">
+                            {% else %}
+                            <div class="member-avatar">{{ member.name|first }}</div>
+                            {% endif %}
+                            <div>
+                                <div style="font-weight:600; font-size:13px;">{{ member.name }}</div>
+                                <div style="font-size:11px; color:var(--text-muted);">{{ member.email }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><code style="font-size:12px; color:var(--primary);">{{ member.member_id }}</code></td>
+                    <td style="font-size:12px; color:var(--text-muted);">{{ member.phone }}</td>
+                    <td style="font-size:12px; color:var(--text-muted);">{{ member.join_date|date:"d M Y" }}</td>
+                    <td>
+                        <span style="font-size:12px;">{{ member.active_borrows }} active / {{ member.total_borrows }}
+                            total</span>
+                    </td>
+                    <td>
+                        {% if member.is_active %}
+                        <span class="badge-status badge-active">Active</span>
+                        {% else %}
+                        <span class="badge-status badge-inactive">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'member_detail' member.pk %}" class="btn-action btn-view"><i
+                                    class="fas fa-eye"></i></a>
+                            <a href="{% url 'member_edit' member.pk %}" class="btn-action btn-edit"><i
+                                    class="fas fa-edit"></i></a>
+                            <a href="{% url 'member_delete' member.pk %}" class="btn-action btn-delete"><i
+                                    class="fas fa-trash"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7">
+                        <div class="empty-state">
+                            <div class="empty-icon">👥</div>
+                            <p>No members found. <a href="{% url 'member_add' %}" style="color:var(--primary);">Add your
+                                    first member!</a></p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

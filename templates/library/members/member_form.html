@@ -1,0 +1,88 @@
+{% extends 'library/base.html' %}
+
+{% block title %}{{ title }} - LMS{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'member_list' %}">Members</a></li>
+        <li class="breadcrumb-item active">{{ title }}</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-xl-8">
+        <div class="lms-card">
+            <div class="lms-card-header">
+                <h5>{{ title }}</h5>
+                {% if member %}<code style="color:var(--primary);">{{ member.member_id }}</code>{% endif %}
+            </div>
+            <div class="lms-card-body">
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Full Name *</label>
+                            {{ form.name }}
+                            {% if form.name.errors %}<div class="text-danger" style="font-size:11px;">{{
+                                form.name.errors.as_text }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email Address *</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}<div class="text-danger" style="font-size:11px;">{{
+                                form.email.errors.as_text }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Phone Number *</label>
+                            {{ form.phone }}
+                            {% if form.phone.errors %}<div class="text-danger" style="font-size:11px;">{{
+                                form.phone.errors.as_text }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Gender</label>
+                            {{ form.gender }}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Active Member</label>
+                            <div class="form-check mt-2">
+                                {{ form.is_active }}
+                                <label class="form-check-label"
+                                    style="font-size:13px; color:var(--text-primary);">Active</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Address</label>
+                            {{ form.address }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Photo</label>
+                            {{ form.photo }}
+                            {% if member and member.photo %}
+                            <small class="d-block mt-1" style="color:var(--text-muted);font-size:11px;">
+                                Current: <a href="{{ member.photo.url }}" target="_blank"
+                                    style="color:var(--primary);">View Photo</a>
+                            </small>
+                            {% endif %}
+                        </div>
+                        {% if form.non_field_errors %}
+                        <div class="col-12">
+                            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="divider mt-4"></div>
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="btn-success-lms">
+                            <i class="fas fa-save"></i> {% if member %}Update Member{% else %}Register Member{% endif %}
+                        </button>
+                        <a href="{% url 'member_list' %}" class="btn-outline-lms"><i class="fas fa-times"></i>
+                            Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

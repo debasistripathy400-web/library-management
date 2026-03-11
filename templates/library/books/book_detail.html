@@ -1,0 +1,138 @@
+{% extends 'library/base.html' %}
+
+{% block title %}{{ book.title }} - LMS{% endblock %}
+{% block page_title %}Book Detail{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'book_list' %}">Books</a></li>
+        <li class="breadcrumb-item active">{{ book.title }}</li>
+    </ol>
+</nav>
+
+<div class="row g-4">
+    <div class="col-xl-4">
+        <div class="lms-card">
+            <div class="lms-card-body" style="text-align:center; padding-top:32px;">
+                {% if book.cover_image %}
+                <img src="{{ book.cover_image.url }}" alt="{{ book.title }}"
+                    style="width:160px; height:210px; object-fit:cover; border-radius:12px; box-shadow: 0 8px 30px rgba(0,0,0,0.4); margin-bottom:20px;">
+                {% else %}
+                <div
+                    style="width:160px; height:210px; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:60px; margin:0 auto 20px; box-shadow: 0 8px 30px rgba(99,102,241,0.3);">
+                    📚</div>
+                {% endif %}
+                <h5 style="font-weight:700; font-size:16px;">{{ book.title }}</h5>
+                <p style="color:var(--text-muted); font-size:13px;">{{ book.author }}</p>
+
+                {% if book.is_available %}
+                <span class="badge-status badge-available" style="font-size:12px; padding:6px 16px;">✔ Available</span>
+                {% else %}
+                <span class="badge-status badge-issued" style="font-size:12px; padding:6px 16px;">✘ All Copies
+                    Issued</span>
+                {% endif %}
+
+                {% if user.is_staff %}
+                <hr style="border-color:var(--border); margin:20px 0;">
+                <div class="d-flex gap-2 justify-content-center">
+                    <a href="{% url 'book_edit' book.pk %}" class="btn-action btn-edit"><i class="fas fa-edit"></i>
+                        Edit</a>
+                    <a href="{% url 'book_delete' book.pk %}" class="btn-action btn-delete"><i class="fas fa-trash"></i>
+                        Delete</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-8">
+        <div class="lms-card mb-3">
+            <div class="lms-card-header">
+                <h5>Book Information</h5>
+            </div>
+            <div class="lms-card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="info-row"><span class="info-label">Title</span> {{ book.title }}</div>
+                        <div class="info-row"><span class="info-label">Author</span> {{ book.author }}</div>
+                        <div class="info-row"><span class="info-label">Category</span> {{ book.category.name|default:"—"
+                            }}</div>
+                        <div class="info-row"><span class="info-label">ISBN</span> {{ book.isbn|default:"—" }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-row"><span class="info-label">Publisher</span> {{ book.publisher|default:"—" }}
+                        </div>
+                        <div class="info-row"><span class="info-label">Year</span> {{ book.publication_year|default:"—"
+                            }}</div>
+                        <div class="info-row"><span class="info-label">Total Qty</span> {{ book.quantity }}</div>
+                        <div class="info-row"><span class="info-label">Available</span> {{ book.available }}</div>
+                    </div>
+                    {% if book.description %}
+                    <div class="col-12">
+                        <div class="info-row">
+                            <span class="info-label">Description</span>
+                            <span style="color:var(--text-muted);">{{ book.description }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction history -->
+        <div class="lms-card">
+            <div class="lms-card-header">
+                <h5>Recent Borrowing History</h5>
+                {% if user.is_staff and book.is_available %}
+                <a href="{% url 'issue_book' %}?book={{ book.pk }}" class="btn-success-lms"
+                    style="font-size:12px; padding:6px 14px;">
+                    <i class="fas fa-hand-holding-heart"></i> Issue
+                </a>
+                {% endif %}
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="lms-table">
+                    <thead>
+                        <tr>
+                            <th>Member</th>
+                            <th>Issued</th>
+                            <th>Due</th>
+                            <th>Returned</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for txn in transactions %}
+                        <tr class="{% if txn.status == 'overdue' %}row-overdue{% endif %}">
+                            <td>
+                                <a href="{% url 'member_detail' txn.member.pk %}"
+                                    style="color:var(--text-primary);text-decoration:none;">
+                                    {{ txn.member.name }}
+                                </a>
+                                <div style="font-size:11px; color:var(--text-muted);">{{ txn.member.member_id }}</div>
+                            </td>
+                            <td style="font-size:12px;">{{ txn.issue_date|date:"d M Y" }}</td>
+                            <td style="font-size:12px;">{{ txn.due_date|date:"d M Y" }}</td>
+                            <td style="font-size:12px;">{{ txn.return_date|date:"d M Y"|default:"—" }}</td>
+                            <td>
+                                <span class="badge-status badge-{{ txn.status }}">{{ txn.get_status_display }}</span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5">
+                                <div class="empty-state">
+                                    <div class="empty-icon">📋</div>
+                                    <p>No transactions yet</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

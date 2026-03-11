@@ -1,0 +1,106 @@
+﻿{% extends 'library/base.html' %}
+{% load static %}
+
+{% block title %}Register - Library Management System{% endblock %}
+
+{% block content %}
+{% endblock %}
+
+{% block auth_content %}
+<div class="login-wrapper">
+    <div class="login-card" style="max-width: 500px;">
+        <div class="login-logo">📝</div>
+        <h2 class="mb-1">Create Account</h2>
+        <p class="mb-4">Join our library community</p>
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger mb-3" role="alert">
+            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-md-12 mb-3">
+                    <label class="form-label">Full Name</label>
+                    <div class="position-relative">
+                        <span style="position:absolute; left:13px; top:50%; transform:translateY(-50%); color:var(--text-muted);">
+                            <i class="fas fa-signature"></i>
+                        </span>
+                        {{ form.name }}
+                    </div>
+                    {% if form.name.errors %}<div class="text-danger small mt-1">{{ form.name.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Username</label>
+                    <div class="position-relative">
+                        <span style="position:absolute; left:13px; top:50%; transform:translateY(-50%); color:var(--text-muted);">
+                            <i class="fas fa-user"></i>
+                        </span>
+                        {{ form.username }}
+                    </div>
+                    {% if form.username.errors %}<div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Phone</label>
+                    <div class="position-relative">
+                        <span style="position:absolute; left:13px; top:50%; transform:translateY(-50%); color:var(--text-muted);">
+                            <i class="fas fa-phone"></i>
+                        </span>
+                        {{ form.phone }}
+                    </div>
+                    {% if form.phone.errors %}<div class="text-danger small mt-1">{{ form.phone.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Email Address</label>
+                <div class="position-relative">
+                    <span style="position:absolute; left:13px; top:50%; transform:translateY(-50%); color:var(--text-muted);">
+                        <i class="fas fa-envelope"></i>
+                    </span>
+                    {{ form.email }}
+                </div>
+                {% if form.email.errors %}<div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Password</label>
+                    <div class="position-relative">
+                        <span style="position:absolute; left:13px; top:50%; transform:translateY(-50%); color:var(--text-muted);">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                        {{ form.password }}
+                    </div>
+                    {% if form.password.errors %}<div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-6 mb-4">
+                    <label class="form-label">Confirm</label>
+                    <div class="position-relative">
+                        <span style="position:absolute; left:13px; top:50%; transform:translateY(-50%); color:var(--text-muted);">
+                            <i class="fas fa-shield-alt"></i>
+                        </span>
+                        {{ form.confirm_password }}
+                    </div>
+                    {% if form.confirm_password.errors %}<div class="text-danger small mt-1">{{ form.confirm_password.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary-lms w-100 justify-content-center py-3">
+                <i class="fas fa-user-plus"></i> Register
+            </button>
+        </form>
+
+        <div class="divider"></div>
+        <p style="font-size:13px; color:var(--text-muted); text-align:center;">
+            Already have an account? <a href="{% url 'login' %}" style="color:var(--primary); text-decoration:none; font-weight:600;">Sign In</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

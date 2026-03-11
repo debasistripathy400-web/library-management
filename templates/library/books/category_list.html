@@ -1,0 +1,86 @@
+{% extends 'library/base.html' %}
+
+{% block title %}Categories - LMS{% endblock %}
+{% block page_title %}Book Categories{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-xl-4">
+        <div class="lms-card">
+            <div class="lms-card-header">
+                <h5><i class="fas fa-plus me-2" style="color:var(--primary);"></i>Add Category</h5>
+            </div>
+            <div class="lms-card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Category Name *</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}<div class="text-danger" style="font-size:11px;">{{
+                            form.name.errors.as_text }}</div>{% endif %}
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Description</label>
+                        {{ form.description }}
+                    </div>
+                    <button type="submit" class="btn-primary-lms"><i class="fas fa-save"></i> Add Category</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-8">
+        <div class="lms-card">
+            <div class="lms-card-header">
+                <h5><i class="fas fa-tags me-2" style="color:var(--primary);"></i>All Categories ({{ categories.count
+                    }})</h5>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="lms-table">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th>Books</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cat in categories %}
+                        <tr>
+                            <td style="font-weight:600; font-size:13px;">
+                                <span class="badge-status"
+                                    style="background:rgba(99,102,241,0.12);color:var(--primary);border:1px solid rgba(99,102,241,0.25);">
+                                    {{ cat.name }}
+                                </span>
+                            </td>
+                            <td style="font-size:12px; color:var(--text-muted);">{{
+                                cat.description|default:"—"|truncatechars:40 }}</td>
+                            <td style="font-size:13px; font-weight:600; text-align:center;">{{ cat.book_count }}</td>
+                            <td>
+                                <form method="post" action="{% url 'category_delete' cat.pk %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-action btn-delete"
+                                        onclick="return confirm('Delete category {{ cat.name }}?')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4">
+                                <div class="empty-state">
+                                    <div class="empty-icon">🏷️</div>
+                                    <p>No categories yet.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

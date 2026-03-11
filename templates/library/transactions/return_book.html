@@ -1,0 +1,85 @@
+{% extends 'library/base.html' %}
+
+{% block title %}Return Book - LMS{% endblock %}
+{% block page_title %}Return Book{% endblock %}
+{% block page_subtitle %}Process book return{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-xl-7">
+        <div class="lms-card mb-3">
+            <div class="lms-card-header">
+                <h5>📘 Transaction Details (TXN-{{ transaction.id }})</h5>
+            </div>
+            <div class="lms-card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="info-row"><span class="info-label">Book</span> {{ transaction.book.title }}</div>
+                        <div class="info-row"><span class="info-label">Author</span> {{ transaction.book.author }}</div>
+                        <div class="info-row"><span class="info-label">Member</span> {{ transaction.member.name }}</div>
+                        <div class="info-row"><span class="info-label">Member ID</span> <code
+                                style="color:var(--primary);">{{ transaction.member.member_id }}</code></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-row"><span class="info-label">Issue Date</span> {{
+                            transaction.issue_date|date:"d M Y" }}</div>
+                        <div class="info-row"><span class="info-label">Due Date</span>
+                            <span style="{% if transaction.is_overdue %}color:#ef4444; font-weight:600;{% endif %}">
+                                {{ transaction.due_date|date:"d M Y" }}
+                                {% if transaction.is_overdue %} ⚠ Overdue{% endif %}
+                            </span>
+                        </div>
+                        <div class="info-row"><span class="info-label">Status</span> <span
+                                class="badge-status badge-{{ transaction.status }}">{{ transaction.get_status_display
+                                }}</span></div>
+                    </div>
+                </div>
+
+                {% if fine > 0 %}
+                <div class="alert alert-warning mt-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Overdue Fine: ₹{{ fine }}</strong>
+                    ({{ transaction.days_remaining|add:"-999999"|default:"0" }}+ days overdue × ₹{{
+                    transaction.fine_per_day }}/day)
+                </div>
+                {% else %}
+                <div class="alert alert-success mt-3">
+                    <i class="fas fa-check-circle me-2"></i>No fine — returned on time!
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="lms-card">
+            <div class="lms-card-header">
+                <h5><i class="fas fa-undo me-2" style="color:var(--secondary);"></i>Process Return</h5>
+            </div>
+            <div class="lms-card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% if fine > 0 %}
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.waive_fine }}
+                            <label class="form-check-label" style="font-size:13px; color:var(--text-primary);">
+                                Waive Fine (₹{{ fine }})
+                            </label>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="mb-4">
+                        <label class="form-label">Return Remarks</label>
+                        {{ form.remarks }}
+                    </div>
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="btn-success-lms"><i class="fas fa-check"></i> Confirm
+                            Return</button>
+                        <a href="{% url 'transaction_list' %}" class="btn-outline-lms"><i class="fas fa-times"></i>
+                            Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
